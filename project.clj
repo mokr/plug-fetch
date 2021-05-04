@@ -5,5 +5,6 @@
             :url  "https://www.eclipse.org/legal/epl-2.0/"}
   :dependencies [[cljs-ajax "0.8.3"]
                  [org.clojure/clojure "1.10.1"]
+                 [org.clojure/clojurescript "1.10.844" :scope "provided"]
                  [re-frame "1.2.0"]]
   :repl-options {:init-ns plug-fetch.core})
