@@ -27,18 +27,30 @@
 
 
 ;|-------------------------------------------------
+;| FX HANDLERS
+
+(defn- ok-handler [{:keys [db]} [{:keys [ok-fx result-path result-merge-in result-fn]
+                                  :as   opts}
+                                 result]]
+  {:pre  [(or (nil? result-path) (sequential? result-path))
+          (or (nil? result-merge-in) (sequential? result-merge-in))]
+   :post [(or (nil? %) (map? %))]}
+  (let [result-to-store (if result-fn (result-fn result) result)]
+    (merge
+      (when (or result-path result-merge-in)
+        {:db (cond-> db
+                     result-path (assoc-in result-path result-to-store) ;; Typically either this ..
+                     result-merge-in (update-in result-merge-in merge result-to-store))}) ;; .. or this, but you can have both
+      (when ok-fx {:fx (process-fx ok-fx result)}))))
+
+
+;|-------------------------------------------------
 ;| HANDLE OUTCOME OF FETCH EVENT
 
 (rf/reg-event-fx
   ::ok
   [rf/trim-v]
-  (fn [{:keys [db]} [{:keys [ok-fx result-path result-fn]
-                      :as   opts
-                      :or   {result-fn identity}}
-                     result]]
-    (merge
-      (when result-path {:db (assoc-in db result-path (result-fn result))})
-      (when ok-fx {:fx (process-fx ok-fx result)}))))
+  ok-handler)
 
 
 (rf/reg-event-fx
