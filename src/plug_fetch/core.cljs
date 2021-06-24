@@ -74,7 +74,26 @@
 ;| GENERIC FETCHING
 
 (defn make-fx-map-for-backend-event
-  "Make fx map for re-frame's reg-event-fx event handler."
+  "
+  Make fx map for re-frame's reg-event-fx event handler.
+
+  Options affecting request:
+  --------------------------
+  :uri               [req] URI endpoint to send request to
+  :method            [opt] Method for the request (default :get)
+  :id                [opt] Currently only used in error event message (not yet finalized)
+  :fx                [opt] Re-frame fx that will be dispatched before :http-xhrio event
+  :params            [opt] Params to send in :params
+  :timeout           [opt] Timeout value for request
+
+  Options affecting result / after request:
+  -----------------------------------------
+  :result-fn          [opt] If provided, result from server will be treated by it before storing
+  :result-path        [opt] Path to store result (possibly treated by :result-fn)
+  :result-merge-in    [opt] app-db path that will be updated by merging in the result (possibly treated by :result-fn)
+  :ok-fx              [opt] Re-frame fxs to send if request OK. Vector of event vectors (same as re-frame :fx)
+  :nok-fx             [opt] Re-frame fxs to send if request not OK. Vector of event vectors (same as re-frame :fx)
+  "
   [{:keys [method id uri fx params timeout] :as opts}]
   {:fx (concat fx
                [[:http-xhrio (merge {:method          (or method :get)
