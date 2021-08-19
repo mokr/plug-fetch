@@ -66,7 +66,7 @@
       :else-treat-as-generic-error
       {:fx (concat (process-fx nok-fx err)
                    [[:dispatch [:reg/error {:source  "plug-fetch"
-                                            :action  (str uri " " last-method)
+                                            :action  (str last-method " " uri)
                                             :message last-error
                                             :raw     err}]]])})))
 
