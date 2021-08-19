@@ -57,7 +57,7 @@
 (rf/reg-event-fx
   ::nok
   [rf/trim-v]
-  (fn [_ [{:keys [id nok-fx] :as opts} {:keys [uri status last-error] :as err}]]
+  (fn [_ [{:keys [id nok-fx] :as opts} {:keys [status last-error uri last-method] :as err}]]
     (cond
       ;; Ensure failed API requests causes appropriate redirect to login (and then back to the current hash route)
       (= 401 status)
@@ -66,7 +66,7 @@
       :else-treat-as-generic-error
       {:fx (concat (process-fx nok-fx err)
                    [[:dispatch [:reg/error {:source  "plug-fetch"
-                                            :uri     uri
+                                            :action  (str uri " " last-method)
                                             :message last-error
                                             :raw     err}]]])})))
 
