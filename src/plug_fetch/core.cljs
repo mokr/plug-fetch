@@ -57,7 +57,7 @@
 (rf/reg-event-fx
   ::nok
   [rf/trim-v]
-  (fn [_ [{:keys [id nok-fx] :as opts} {:keys [status last-error] :as err}]]
+  (fn [_ [{:keys [id nok-fx] :as opts} {:keys [uri status last-error] :as err}]]
     (cond
       ;; Ensure failed API requests causes appropriate redirect to login (and then back to the current hash route)
       (= 401 status)
@@ -65,7 +65,8 @@
 
       :else-treat-as-generic-error
       {:fx (concat (process-fx nok-fx err)
-                   [[:dispatch [:reg/error {:id      id
+                   [[:dispatch [:reg/error {:source  "plug-fetch"
+                                            :uri     uri
                                             :message last-error
                                             :raw     err}]]])})))
 
@@ -74,8 +75,7 @@
 ;| GENERIC FETCHING
 
 (defn make-fx-map-for-backend-event
-  "
-  Make fx map for re-frame's reg-event-fx event handler.
+  "Make fx map for re-frame's reg-event-fx event handler.
 
   Options affecting request:
   --------------------------
@@ -92,9 +92,8 @@
   :result-path        [opt] Path to store result (possibly treated by :result-fn)
   :result-merge-in    [opt] app-db path that will be updated by merging in the result (possibly treated by :result-fn)
   :ok-fx              [opt] Re-frame fxs to send if request OK. Vector of event vectors (same as re-frame :fx)
-  :nok-fx             [opt] Re-frame fxs to send if request not OK. Vector of event vectors (same as re-frame :fx)
-  "
-  [{:keys [method id uri fx params timeout] :as opts}]
+  :nok-fx             [opt] Re-frame fxs to send if request not OK. Vector of event vectors (same as re-frame :fx)"
+  [{:keys [method uri fx params timeout] :as opts}]
   {:fx (concat fx
                [[:http-xhrio (merge {:method          (or method :get)
                                      :uri             uri
