@@ -57,7 +57,7 @@
 (rf/reg-event-fx
   ::nok
   [rf/trim-v]
-  (fn [_ [{:keys [id nok-fx] :as opts} {:keys [status last-error uri last-method] :as err}]]
+  (fn [_ [{:keys [nok-fx] :as opts} {:keys [status last-error uri last-method] :as err}]]
     (cond
       ;; Ensure failed API requests causes appropriate redirect to login (and then back to the current hash route)
       (= 401 status)
@@ -81,7 +81,6 @@
   --------------------------
   :uri               [req] URI endpoint to send request to
   :method            [opt] Method for the request (default :get)
-  :id                [opt] Currently only used in error event message (not yet finalized)
   :fx                [opt] Re-frame fx that will be dispatched before :http-xhrio event
   :params            [opt] Params to send in :params
   :timeout           [opt] Timeout value for request
