@@ -30,7 +30,7 @@
 ;|-------------------------------------------------
 ;| FX HANDLERS
 
-(defn- ok-handler [{:keys [db]} [{:keys [ok-fx result-path result-merge-in result-fn]
+(defn- ok-handler [{:keys [db]} [{:keys [ok-fx result-path result-event result-merge-in result-fn]
                                   :as   opts}
                                  result]]
   {:pre  [(or (nil? result-path) (sequential? result-path))
@@ -89,6 +89,7 @@
   -----------------------------------------
   :result-fn          [opt] If provided, result from server will be treated by it before storing
   :result-path        [opt] Path to store result (possibly treated by :result-fn)
+  :result-event       [opt] Send result as last entry in this event vector (possibly treated by :result-fn). Useful when more involved processing is needed before incorporation result in DB.
   :result-merge-in    [opt] app-db path that will be updated by merging in the result (possibly treated by :result-fn)
   :ok-fx              [opt] Re-frame fxs to send if request OK. Vector of event vectors (same as re-frame :fx)
   :nok-fx             [opt] Re-frame fxs to send if request not OK. Vector of event vectors (same as re-frame :fx)"
@@ -97,8 +98,7 @@
                [[:http-xhrio (merge {:method          (or method :get)
                                      :uri             uri
                                      :format          (transit/transit-request-format) ; Transit ensures namespaced keys survive
-                                     ;:response-format (json/json-response-format {:keywords? true}) ;; IMPORTANT!: You must provide this.
-                                     :response-format (edn/edn-response-format)
+                                     :response-format (transit/transit-response-format)
                                      :on-success      [::ok opts]
                                      :on-failure      [::nok opts]}
                                     (when params {:params params})
