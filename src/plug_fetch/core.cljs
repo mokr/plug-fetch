@@ -1,8 +1,10 @@
 (ns plug-fetch.core
-  (:require [ajax.edn :as edn]
+  (:require
+    [ajax.edn :as edn]
+    [ajax.transit :as transit]
     ;[ajax.json :as json]
-            [ajax.transit :as transit]
-            [re-frame.core :as rf]))
+    ;[ajax.core :as ajax]
+    [re-frame.core :as rf]))
 
 
 ;|-------------------------------------------------
@@ -98,7 +100,10 @@
                [[:http-xhrio (merge {:method          (or method :get)
                                      :uri             uri
                                      :format          (transit/transit-request-format) ; Transit ensures namespaced keys survive
-                                     :response-format (transit/transit-response-format)
+                                     ;:format          (ajax/json-request-format)
+                                     :response-format (edn/edn-response-format)
+                                     ;:response-format (transit/transit-response-format)
+                                     ;:response-format (ajax/json-response-format {:keywords? true})
                                      :on-success      [::ok opts]
                                      :on-failure      [::nok opts]}
                                     (when params {:params params})
