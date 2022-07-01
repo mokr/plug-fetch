@@ -36,7 +36,8 @@
                                   :as   opts}
                                  result]]
   {:pre  [(or (nil? result-path) (sequential? result-path))
-          (or (nil? result-merge-in) (sequential? result-merge-in))]
+          (or (nil? result-merge-in) (sequential? result-merge-in))
+          (or (nil? result-event) (keyword? result-event))]
    :post [(or (nil? %) (map? %))]}
   (let [result-to-store (if result-fn (result-fn result) result)]
     (merge
@@ -44,8 +45,10 @@
         {:db (cond-> db
                      result-path (assoc-in result-path result-to-store) ;; Typically either this ..
                      result-merge-in (update-in result-merge-in merge result-to-store))}) ;; .. or this, but you can have both
-      (when ok-fx {:fx (process-fx ok-fx result)}))))
-
+      (when (or result-event ok-fx)
+        {:fx (concat
+               (when result-event [result-event result])    ;; Note: Wrapped in vector as concat should return coll of vectors
+               (when ok-fx (process-fx ok-fx result)))}))))
 
 ;|-------------------------------------------------
 ;| HANDLE OUTCOME OF FETCH EVENT
@@ -91,7 +94,7 @@
   -----------------------------------------
   :result-fn          [opt] If provided, result from server will be treated by it before storing
   :result-path        [opt] Path to store result (possibly treated by :result-fn)
-  :result-event       [opt] Send result as last entry in this event vector (possibly treated by :result-fn). Useful when more involved processing is needed before incorporation result in DB.
+  :result-event       [opt] Send result as last entry in this event vector (not processed by any result-fn). Useful when more involved processing is needed before incorporation result in DB.
   :result-merge-in    [opt] app-db path that will be updated by merging in the result (possibly treated by :result-fn)
   :ok-fx              [opt] Re-frame fxs to send if request OK. Vector of event vectors (same as re-frame :fx)
   :nok-fx             [opt] Re-frame fxs to send if request not OK. Vector of event vectors (same as re-frame :fx)"
