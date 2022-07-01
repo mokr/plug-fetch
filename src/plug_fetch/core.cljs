@@ -47,7 +47,7 @@
                      result-merge-in (update-in result-merge-in merge result-to-store))}) ;; .. or this, but you can have both
       (when (or result-event ok-fx)
         {:fx (concat
-               (when result-event [[result-event result]])  ;; Note: Wrapped in vectors as concat should return coll of vectors
+               (when result-event [[:dispatch [result-event result]]]) ;; Note: Wrapped in vectors as concat should return coll of vectors
                (when ok-fx (process-fx ok-fx result)))}))))
 
 ;|-------------------------------------------------
